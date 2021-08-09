@@ -12,7 +12,7 @@ const ConversationView = ({ user, conversationId }) => {
         .ref('Chats/' + conversationId);
       conversationRef.on('value', (snapshot) => {
         const data = snapshot.val();
-        if (chatDetails.length !== data.length) setChatDetails(data);
+        if (data && chatDetails.length !== data.length) setChatDetails(data);
         console.log(data);
       });
     }
