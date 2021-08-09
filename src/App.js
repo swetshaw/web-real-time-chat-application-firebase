@@ -139,7 +139,7 @@ const updateStatus = (convId) =>{
           </div>
           <div className="chat-container">
             <div className="sidebar-container">
-              <SideBar user={user} userList={userList} setActivePeer={setActivePeer} />
+              <SideBar user={user} userList={userList} activePeer={activePeer} setActivePeer={setActivePeer} />
             </div>
             <div className="channel-container">
             {/* we will show the conversation channel when the user clicks on a peer */}

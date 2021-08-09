@@ -2,7 +2,7 @@ import React from 'react';
 import firebase from 'firebase/app';
 
 // we set activePeer when the user clicks on a peer to chat with
-const UserListView = ({ user, userList, setActivePeer }) => {
+const UserListView = ({ user, userList, setActivePeer, activePeer }) => {
   // userList is an object, we convert it to an array tmpUserList
   const tmpUserList = [];
 
@@ -35,7 +35,11 @@ const UserListView = ({ user, userList, setActivePeer }) => {
       {tmpUserList.map((peerInfo) =>
         peerInfo.uid !== user.uid ? (
           <div
-            className='peers-container'
+            className={
+              peerInfo.uid === activePeer.uid
+                ? 'peer-selected peers-container'
+                : 'peers-container'
+            }
             key={peerInfo.email}
             onClick={() => {
               handlePeerClick(peerInfo);

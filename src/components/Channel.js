@@ -27,8 +27,8 @@ const Channel = ({ user, activePeer }) => {
         }
       });
   };
-  
-  const updateStatus = (convId) => {
+
+  const updateStatus = (convId, user) => {
     const dbRef = firebase.database().ref();
     dbRef
       .child('Chats')
@@ -40,12 +40,12 @@ const Channel = ({ user, activePeer }) => {
           const msgsKeys = Object.keys(msgs);
           for (let i = msgsKeys.length - 1; i >= 0; i--) {
             if (msgs[msgsKeys[i]].status === 'seen') break;
-
-            dbRef
-              .child('Chats')
-              .child(convId)
-              .child(msgsKeys[i])
-              .update({ ...msgs[msgsKeys[i]], status: 'seen' });
+            if (user.email === msgs[msgsKeys[i]].receiver)
+              dbRef
+                .child('Chats')
+                .child(convId)
+                .child(msgsKeys[i])
+                .update({ ...msgs[msgsKeys[i]], status: 'seen' });
           }
         }
       });
@@ -61,11 +61,11 @@ const Channel = ({ user, activePeer }) => {
         if (snapshot.exists()) {
           setConversationId(user.uid + activePeer.uid);
           UpdateConversationHistory(user.uid + activePeer.uid);
-          updateStatus(user.uid + activePeer.uid);
+          updateStatus(user.uid + activePeer.uid, user);
         } else {
           setConversationId(activePeer.uid + user.uid);
           UpdateConversationHistory(activePeer.uid + user.uid);
-          updateStatus(activePeer.uid + user.uid);
+          updateStatus(activePeer.uid + user.ui, user);
         }
       })
       .catch((error) => {
@@ -113,6 +113,9 @@ const Channel = ({ user, activePeer }) => {
 
   return (
     <div className='conversation-container'>
+      <div className='conversation-header'>
+        Conversation with: {activePeer.displayName}
+      </div>
       <ConversationView user={user} conversationId={conversationId} />
 
       <MessageInput
@@ -125,4 +128,3 @@ const Channel = ({ user, activePeer }) => {
 };
 
 export default Channel;
-

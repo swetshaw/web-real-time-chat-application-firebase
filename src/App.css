@@ -109,12 +109,24 @@
   width: 64px;
 }
 
+.conversation-hearder {
+  height: 16px;
+  padding: 12px;
+  background-color: #ffe1ba;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  justify-content: flex-start;
+  transition: ease-in;
+}
+
 .peers-container {
   display: flex;
   align-items: center;
   width: 100%;
   height: 64px;
   cursor: pointer;
+  padding-left: 4px;
 }
 
 .peer-avatar {
@@ -175,4 +187,10 @@
 
 .empty-channel-wrapper {
   padding: 8px;
+}
+
+.peer-selected {
+  border-radius: 4px;
+  padding-left: 4px;
+  background-color: #d7fae1;
 }
