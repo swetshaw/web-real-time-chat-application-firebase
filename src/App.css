@@ -1,38 +1,175 @@
-.App {
-  text-align: center;
+.app-container {
+  width: 100vh;
+  height: 100vh;
+  padding: 12px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.auth-button {
+  height: 32px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.wave-chat-header {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+}
+.wave-chat-header h3 {
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.btn-sign-out {
+  background-color: rgb(177, 86, 26);
+  color: white;
+}
+.btn-sign-in {
+  background-color: rgb(104, 26, 177);
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.chat-container {
+  display: flex;
+  height: 80vh;
+  box-shadow: 0px 0px 1px 0px rgb(92, 90, 90);
+}
+.sidebar-container {
+  display: flex;
+  flex-basis: 200px;
+  box-shadow: 0px 0px 1px 0px rgb(92, 90, 90);
+  padding: 8px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.channel-container {
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.conversation-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.conversation-wrapper {
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
+  padding: 12px;
+}
+.conversation-token {
+  width: 300px;
+  border-radius: 12px;
+  box-shadow: 0px 0px 1px 0px rgb(92, 90, 90);
+  margin-bottom: 12px;
+  padding: 4px;
+}
+
+.conversation-content-right {
+  display: flex;
+  align-self: flex-end;
+  background-color: #d7fae1;
+}
+.conversation-content-left {
+  display: flex;
+  align-self: flex-start;
+  background-color: #dbd9ff;
+}
+
+.send-message-container {
+  display: flex;
+  height: 42px;
+}
+
+.send-message-wrapper {
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 1;
+  height: 42px;
+}
+
+.send-message-wrapper input {
+  width: 100%;
+  z-index: 1;
+  box-shadow: 0px 0px 1px 0px rgb(92 90 90);
+  border: none;
+}
+.send-button-wrapper {
+  display: flex;
+  width: 64px;
+}
+.send-button-wrapper button {
+  color: white;
+  background-color: rgb(28, 148, 108);
+  border: none;
+  width: 64px;
+}
+
+.peers-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 64px;
+  cursor: pointer;
+}
+
+.peer-avatar {
+  height: 32px;
+  width: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 100%;
+  cursor: pointer;
+  padding: 0px;
+  overflow: hidden;
+  border-radius: 100%;
+  object-fit: contain;
+  margin-right: 12px;
+}
+
+.conversation-content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding-left: 4px;
+  padding-right: 12px;
+}
+.seen-status {
+  color: blue;
+  letter-spacing: -2px;
+}
+
+.delivered-status {
+  color: grey;
+  letter-spacing: -2px;
+}
+
+.sent-status {
+  color: grey;
+}
+
+.online-marker {
+  color: green;
+  font-size: 30px;
+}
+
+.offline-marker {
+  color: gray;
+  font-size: 30px;
+}
+
+.online-status {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 12px;
+}
+
+.empty-channel-wrapper {
+  padding: 8px;
 }

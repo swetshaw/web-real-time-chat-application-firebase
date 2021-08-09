@@ -1,0 +1,14 @@
+{
+    "chats": {
+        "chat001": {
+            "sender": "Dip",
+            "receiver": "Sweta",
+            "content": "Hii"
+        },
+        "chat002": {
+            "sender": "Dip",
+            "receiver": "Sourav",
+            "content": "Hello"
+        }
+    }
+}
