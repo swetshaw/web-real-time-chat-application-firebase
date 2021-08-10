@@ -16,6 +16,7 @@ function App() {
   const [userList, setUserList] = useState({});
   const [activePeer, setActivePeer] = useState('');
 
+
   // while the user details loads
   const [initializing, setInitializing] = useState(true); 
   
@@ -54,6 +55,21 @@ const updateStatus = (convId) =>{
   })
   
 }
+useEffect(()=>{
+  window.addEventListener('beforeunload', (e)=>{
+    e.preventDefault();
+    if (user){
+      const updatedUserInfo = {
+        uid: user.uid,
+        displayName: user.displayName,
+        email: user.email,
+        profile_picture: user.photoURL,
+        isOnline:false
+      };
+      firebase.database().ref().child('Users').child(user.uid).update(updatedUserInfo);
+    }
+  })
+}, [user]);
 // gets the logged user from firebase
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -125,7 +141,7 @@ const updateStatus = (convId) =>{
     } catch (error) {
       console.log(error.message);
     }
-  }; 
+  };
 
   if (initializing) return 'Loading....';
  

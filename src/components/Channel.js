@@ -9,23 +9,10 @@ const Channel = ({ user, activePeer }) => {
 
   // we maintain conversation history to store the conversation ids that a the user has been a part of
   const UpdateConversationHistory = (convId) => {
-    const historyRef = firebase.database().ref();
-    historyRef
-      .child('ConversationHistory')
-      .child(user.uid)
-      .get()
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          console.log('Data available');
-        } else {
-          console.log('Data Not available');
-          historyRef
-            .child('ConversationHistory')
-            .child(user.uid)
-            .child(convId)
-            .update({ chat: true });
-        }
-      });
+    const dbRef = firebase.database().ref();
+    dbRef
+      .child('ConversationHistory/' + user.uid + '/' + convId)
+      .update({ chat: true });
   };
 
   const updateStatus = (convId, user) => {
@@ -64,8 +51,29 @@ const Channel = ({ user, activePeer }) => {
           updateStatus(user.uid + activePeer.uid, user);
         } else {
           setConversationId(activePeer.uid + user.uid);
+          dbRef
+            .child('Chats')
+            .child(activePeer.uid + user.uid)
+            .get()
+            .then((snapshot) => {
+              if (!snapshot.exists()) {
+                const newMsgKey = dbRef
+                  .child('Chats')
+                  .child(activePeer.uid + user.uid)
+                  .push().key;
+                dbRef
+                  .child('Chats/' + activePeer.uid + user.uid + '/' + newMsgKey)
+                  .update({
+                    sender: user.email,
+                    receiver: activePeer.email,
+                    content: '👋',
+                    status: 'sent',
+                    timestamp: new Date(),
+                  });
+              }
+            });
           UpdateConversationHistory(activePeer.uid + user.uid);
-          updateStatus(activePeer.uid + user.ui, user);
+          updateStatus(activePeer.uid + user.uid, user);
         }
       })
       .catch((error) => {
@@ -73,6 +81,31 @@ const Channel = ({ user, activePeer }) => {
       });
   }, [activePeer]);
 
+  useEffect(() => {
+    document.addEventListener('visibilitychange', () => {
+      if (conversationId) {
+        const dbRef = firebase.database().ref();
+        dbRef
+          .child('Chats')
+          .child(conversationId)
+          .get()
+          .then((snapshot) => {
+            if (snapshot.exists()) {
+              const msgs = snapshot.val();
+              const msgsKeys = Object.keys(msgs);
+              for (let i = msgsKeys.length - 1; i >= 0; i--) {
+                if (msgs[msgsKeys[i]].status === 'seen') break;
+                dbRef
+                  .child('Chats')
+                  .child(conversationId)
+                  .child(msgsKeys[i])
+                  .update({ ...msgs[msgsKeys[i]], status: 'seen' });
+              }
+            }
+          });
+      }
+    });
+  }, [conversationId]);
   const handleMessageInput = (event) => {
     // console.log(event.target.value, user.uid);
     setMessage(event.target.value);
@@ -89,9 +122,7 @@ const Channel = ({ user, activePeer }) => {
       .then((snapshot) => {
         const peerVal = snapshot.val();
         let messageStatus = 'sent';
-        if (peerVal.activePeer === user.uid) {
-          messageStatus = 'seen';
-        } else if (peerVal.isOnline) {
+        if (peerVal.isOnline) {
           messageStatus = 'delivered';
         }
         const chatData = {
@@ -103,7 +134,7 @@ const Channel = ({ user, activePeer }) => {
         };
         const newMsgKey = dbRef.child('Chats').child(conversationId).push().key;
 
-        const chatRef = firebase
+        firebase
           .database()
           .ref('Chats/' + conversationId + '/' + newMsgKey)
           .update(chatData);
@@ -116,7 +147,11 @@ const Channel = ({ user, activePeer }) => {
       <div className='conversation-header'>
         Conversation with: {activePeer.displayName}
       </div>
-      <ConversationView user={user} conversationId={conversationId} />
+      <ConversationView
+        user={user}
+        activePeer={activePeer}
+        conversationId={conversationId}
+      />
 
       <MessageInput
         sendMessage={sendMessage}

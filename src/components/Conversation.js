@@ -8,7 +8,8 @@ const Conversation = ({ user, chatDetails }) => {
     if (chatDetails.hasOwnProperty(id)) tmpChatList.push(chatDetails[id]);
   }
   useEffect(() => {
-    dummyLastEleRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (dummyLastEleRef.current)
+      dummyLastEleRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [chatDetails]);
   return (
     <div className='conversation-wrapper'>
