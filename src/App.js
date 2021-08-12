@@ -10,94 +10,118 @@ import 'firebase/firestore';
 
 import { auth } from './services/firebase';
 
-
 function App() {
   const [user, setUser] = useState(() => auth.currentUser);
+  const [userInfo, setUserInfo] = useState();
   const [userList, setUserList] = useState({});
   const [activePeer, setActivePeer] = useState('');
 
-
   // while the user details loads
-  const [initializing, setInitializing] = useState(true); 
-  
+  const [initializing, setInitializing] = useState(true);
+
   // get all the users registered in the app
-  useEffect(() =>{
+  useEffect(() => {
     const dbRef = firebase.database().ref();
-  dbRef.child("Users").get().then((snapshotUserList) => {
-      if (snapshotUserList.exists()) {
-        setUserList(snapshotUserList.val());
-      } else {
-    console.log("No data available");
-  }}).catch((error) => {
-    console.error(error);
-  })
+    dbRef
+      .child('Users')
+      .get()
+      .then((snapshotUserList) => {
+        if (snapshotUserList.exists()) {
+          setUserList(snapshotUserList.val());
+        } else {
+          console.log('No data available');
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }, []);
 
-// function to update the status of sent messages to delivered when the user logs in into the app
-const updateStatus = (convId) =>{
-  const dbRef = firebase.database().ref()
-  dbRef.child('Chats')
-  .child(convId)
-  .get()
-  .then(snapshot => {
-    if(snapshot.exists()){
-      const msgs = snapshot.val();
-      const msgsKeys = Object.keys(msgs);
-      for (let i=msgsKeys.length - 1; i >=0; i--){
-        if(msgs[msgsKeys[i]].status === 'delivered' || msgs[msgsKeys[i]].status === 'seen') break;
-        if (msgs[msgsKeys[i]].status === 'sent')
-          dbRef.child('Chats')
-          .child(convId)
-          .child(msgsKeys[i])
-          .update({...msgs[msgsKeys[i]], status: 'delivered'})
+  // function to update the status of sent messages to delivered when the user logs in into the app
+  const updateStatus = (convId) => {
+    const dbRef = firebase.database().ref();
+    dbRef
+      .child('Chats')
+      .child(convId)
+      .get()
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const msgs = snapshot.val();
+          const msgsKeys = Object.keys(msgs);
+          for (let i = msgsKeys.length - 1; i >= 0; i--) {
+            if (
+              msgs[msgsKeys[i]].status === 'delivered' ||
+              msgs[msgsKeys[i]].status === 'seen'
+            )
+              break;
+            if (msgs[msgsKeys[i]].status === 'sent') {
+              dbRef
+                .child('Chats')
+                .child(convId)
+                .child(msgsKeys[i])
+                .update({ ...msgs[msgsKeys[i]], status: 'delivered' });
+              console.log('Messages delivered');
+            }
+          }
+        }
+      });
+  };
+  useEffect(() => {
+    window.addEventListener('beforeunload', (e) => {
+      e.preventDefault();
+      if (user) {
+        const updatedUserInfo = {
+          uid: user.uid,
+          displayName: user.displayName,
+          email: user.email,
+          profile_picture: user.photoURL,
+          isOnline: false,
+          isActive: false,
+        };
+        firebase
+          .database()
+          .ref()
+          .child('Users')
+          .child(user.uid)
+          .update(updatedUserInfo);
       }
-    }
-  })
-  
-}
-useEffect(()=>{
-  window.addEventListener('beforeunload', (e)=>{
-    e.preventDefault();
-    if (user){
-      const updatedUserInfo = {
-        uid: user.uid,
-        displayName: user.displayName,
-        email: user.email,
-        profile_picture: user.photoURL,
-        isOnline:false
-      };
-      firebase.database().ref().child('Users').child(user.uid).update(updatedUserInfo);
-    }
-  })
-}, [user]);
-// gets the logged user from firebase
+    });
+  }, [user]);
+  // gets the logged user from firebase
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUser(user);
+        const userDetails = {
+          uid: user.uid,
+          displayName: user.displayName,
+          email: user.email,
+          profile_picture: user.photoURL,
+          isOnline: true,
+          isActive: true,
+        };
         firebase
           .database()
           .ref('Users/' + user.uid)
-          .set({
-            uid: user.uid,
-            displayName: user.displayName,
-            email: user.email,
-            profile_picture: user.photoURL,
-            isOnline:true
-          });
-          
+          .set(userDetails);
+
+        setUserInfo(userDetails);
+
         // when the user logs in , we get the list of all conversations the user is a part of and update the status of "sent" messages to "delivered"
-        firebase.database().ref('ConversationHistory/'+user.uid).get().then((snapshot) => {
-          if (snapshot.exists()){
-            const conversationData = snapshot.val()
-            for(let convId in conversationData){
-              if(conversationData.hasOwnProperty(convId)){
-                updateStatus(convId)
+        firebase
+          .database()
+          .ref('ConversationHistory/' + user.uid)
+          .get()
+          .then((snapshot) => {
+            if (snapshot.exists()) {
+              const conversationData = snapshot.val();
+              for (let convId in conversationData) {
+                if (conversationData.hasOwnProperty(convId)) {
+                  updateStatus(convId);
+                }
               }
             }
-          }
-        })
-        
+          });
       } else {
         setUser(null);
       }
@@ -127,15 +151,16 @@ useEffect(()=>{
     try {
       await firebase.auth().signOut();
       firebase
-          .database()
-          .ref('Users/' + user.uid)
-          .set({
-            uid: user.uid,
-            displayName: user.displayName,
-            email: user.email,
-            profile_picture: user.photoURL,
-            isOnline:false
-          });
+        .database()
+        .ref('Users/' + user.uid)
+        .set({
+          uid: user.uid,
+          displayName: user.displayName,
+          email: user.email,
+          profile_picture: user.photoURL,
+          isOnline: false,
+          isActive: false,
+        });
       setUserList({});
       setActivePeer('');
     } catch (error) {
@@ -144,27 +169,44 @@ useEffect(()=>{
   };
 
   if (initializing) return 'Loading....';
- 
+
   return (
     <div className='app-container'>
       {user ? (
         <>
-          <div className="wave-chat-header">
+          <div className='wave-chat-header'>
             <h3>Wave-Chat</h3>
-            <button className="auth-button btn-sign-out" onClick={signOut}>Sign Out</button>
+            <button className='auth-button btn-sign-out' onClick={signOut}>
+              Sign Out
+            </button>
           </div>
-          <div className="chat-container">
-            <div className="sidebar-container">
-              <SideBar user={user} userList={userList} activePeer={activePeer} setActivePeer={setActivePeer} />
+          <div className='chat-container'>
+            <div className='sidebar-container'>
+              <SideBar
+                user={user}
+                userList={userList}
+                activePeer={activePeer}
+                setActivePeer={setActivePeer}
+              />
             </div>
-            <div className="channel-container">
-            {/* we will show the conversation channel when the user clicks on a peer */}
-              { activePeer? <Channel user={user} activePeer={activePeer} /> : <EmptyChannelView /> }
+            <div className='channel-container'>
+              {/* we will show the conversation channel when the user clicks on a peer else landing channel screen will be EmptyChannelView */}
+              {activePeer ? (
+                <Channel
+                  user={user}
+                  userInfo={userInfo}
+                  activePeer={activePeer}
+                />
+              ) : (
+                <EmptyChannelView />
+              )}
             </div>
           </div>
         </>
       ) : (
-        <button className="auth-button btn-sign-in" onClick={signInWithGoogle}>Sign In with Google</button>
+        <button className='auth-button btn-sign-in' onClick={signInWithGoogle}>
+          Sign In with Google
+        </button>
       )}
     </div>
   );

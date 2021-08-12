@@ -3,11 +3,11 @@ import firebase from 'firebase/app';
 import MessageInput from './MessageInput';
 import ConversationView from './ConversationView';
 
-const Channel = ({ user, activePeer }) => {
+const Channel = ({ user, activePeer, userInfo }) => {
   const [message, setMessage] = useState('');
   const [conversationId, setConversationId] = useState('');
-
-  // we maintain conversation history to store the conversation ids that a the user has been a part of
+  
+  // we maintain conversation history to store the conversation ids that the user has been a part of
   const UpdateConversationHistory = (convId) => {
     const dbRef = firebase.database().ref();
     dbRef
@@ -27,12 +27,13 @@ const Channel = ({ user, activePeer }) => {
           const msgsKeys = Object.keys(msgs);
           for (let i = msgsKeys.length - 1; i >= 0; i--) {
             if (msgs[msgsKeys[i]].status === 'seen') break;
-            if (user.email === msgs[msgsKeys[i]].receiver)
+            if (user.email === msgs[msgsKeys[i]].receiver) {
               dbRef
                 .child('Chats')
                 .child(convId)
                 .child(msgsKeys[i])
                 .update({ ...msgs[msgsKeys[i]], status: 'seen' });
+            }
           }
         }
       });
@@ -81,31 +82,53 @@ const Channel = ({ user, activePeer }) => {
       });
   }, [activePeer]);
 
+
   useEffect(() => {
     document.addEventListener('visibilitychange', () => {
-      if (conversationId) {
-        const dbRef = firebase.database().ref();
-        dbRef
-          .child('Chats')
-          .child(conversationId)
-          .get()
-          .then((snapshot) => {
-            if (snapshot.exists()) {
-              const msgs = snapshot.val();
-              const msgsKeys = Object.keys(msgs);
-              for (let i = msgsKeys.length - 1; i >= 0; i--) {
-                if (msgs[msgsKeys[i]].status === 'seen') break;
-                dbRef
-                  .child('Chats')
-                  .child(conversationId)
-                  .child(msgsKeys[i])
-                  .update({ ...msgs[msgsKeys[i]], status: 'seen' });
-              }
-            }
-          });
+      if (document.visibilityState === 'visible') {
+        if (user) {
+          firebase
+            .database()
+            .ref()
+            .child('Users')
+            .child(userInfo.uid)
+            .update({ ...userInfo, isActive: true });
+          if (conversationId) {
+            const dbRef = firebase.database().ref();
+            dbRef
+              .child('Chats')
+              .child(conversationId)
+              .get()
+              .then((snapshot) => {
+                if (snapshot.exists()) {
+                  const msgs = snapshot.val();
+                  const msgsKeys = Object.keys(msgs);
+                  for (let i = msgsKeys.length - 1; i >= 0; i--) {
+                    if (msgs[msgsKeys[i]].status === 'seen') break;
+                    dbRef
+                      .child('Chats')
+                      .child(conversationId)
+                      .child(msgsKeys[i])
+                      .update({ ...msgs[msgsKeys[i]], status: 'seen' });
+                    // console.log('Updating message SEEN');
+                  }
+                }
+              });
+          }
+        }
+      }
+      if (document.visibilityState === 'hidden') {
+        if (user) {
+          firebase
+            .database()
+            .ref()
+            .child('Users')
+            .child(userInfo.uid)
+            .update({ ...userInfo, isActive: false });
+        }
       }
     });
-  }, [conversationId]);
+  });
   const handleMessageInput = (event) => {
     // console.log(event.target.value, user.uid);
     setMessage(event.target.value);
@@ -122,7 +145,13 @@ const Channel = ({ user, activePeer }) => {
       .then((snapshot) => {
         const peerVal = snapshot.val();
         let messageStatus = 'sent';
-        if (peerVal.isOnline) {
+        if (
+          peerVal.isOnline &&
+          peerVal.isActive &&
+          peerVal.activePeer === user.uid
+        ) {
+          messageStatus = 'seen';
+        } else if (peerVal.isOnline) {
           messageStatus = 'delivered';
         }
         const chatData = {

@@ -15,6 +15,27 @@ const ConversationView = ({ user, conversationId, activePeer }) => {
         conversationRef.on('value', (snapshot) => {
           const data = snapshot.val();
           if (data) {
+            // if (conversationId && ) {
+            //   const dbRef = firebase.database().ref();
+            //   dbRef
+            //     .child('Chats')
+            //     .child(conversationId)
+            //     .get()
+            //     .then((snapshot) => {
+            //       if (snapshot.exists()) {
+            //         const msgs = snapshot.val();
+            //         const msgsKeys = Object.keys(msgs);
+            //         for (let i = msgsKeys.length - 1; i >= 0; i--) {
+            //           if (msgs[msgsKeys[i]].status === 'seen') break;
+            //           dbRef
+            //             .child('Chats')
+            //             .child(conversationId)
+            //             .child(msgsKeys[i])
+            //             .update({ ...msgs[msgsKeys[i]], status: 'seen' });
+            //         }
+            //       }
+            //     });
+            // }
             setChatDetails({ [conversationId]: data });
           } else {
             setChatDetails({ [conversationId]: {} });
@@ -26,7 +47,7 @@ const ConversationView = ({ user, conversationId, activePeer }) => {
     } catch (e) {
       console.log(e);
     }
-  }, [conversationId]);
+  }, [conversationId, activePeer]);
 
   return (
     <>
