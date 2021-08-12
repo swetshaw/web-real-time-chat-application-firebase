@@ -84,6 +84,7 @@ function App() {
           .child('Users')
           .child(user.uid)
           .update(updatedUserInfo);
+        setUserInfo(updatedUserInfo);
       }
     });
   }, [user]);
