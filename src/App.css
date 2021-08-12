@@ -1,7 +1,8 @@
 .app-container {
   width: 90vw;
-  height: 100vh;
+  height: 95vh;
   padding: 12px;
+  margin: auto;
 }
 
 .auth-button {
@@ -12,7 +13,7 @@
   display: flex;
   align-items: center;
 }
-.wave-chat-header h3 {
+.wave-chat-header h1 {
   display: flex;
   flex-grow: 1;
   flex-shrink: 1;
@@ -21,6 +22,9 @@
 .btn-sign-out {
   background-color: rgb(177, 86, 26);
   color: white;
+  cursor: pointer;
+  border: none;
+  border-radius: 10%;
 }
 .btn-sign-in {
   background-color: rgb(104, 26, 177);
@@ -38,12 +42,14 @@
   flex-basis: 200px;
   box-shadow: 0px 0px 1px 0px rgb(92, 90, 90);
   padding: 8px;
+  /* background-color: #efd3f8; */
 }
 
 .channel-container {
   display: flex;
   flex-grow: 1;
   flex-shrink: 1;
+  /* background: linear-gradient(to right, #b9f8e0, #e7bbfd, #f7a5aa); */
 }
 
 .conversation-container {
@@ -64,7 +70,7 @@
 .conversation-token {
   width: 300px;
   border-radius: 12px;
-  box-shadow: 0px 0px 1px 0px rgb(92, 90, 90);
+  /* box-shadow: 0px 0px 1px 0px rgb(92, 90, 90); */
   margin-bottom: 12px;
   padding: 4px;
 }
@@ -72,12 +78,16 @@
 .conversation-content-right {
   display: flex;
   align-self: flex-end;
-  background-color: #d7fae1;
+  background-color: #e8c8fa;
 }
 .conversation-content-left {
   display: flex;
   align-self: flex-start;
-  background-color: #dbd9ff;
+  background-color: #d6fcc1;
+}
+
+.chat-content{
+  overflow-wrap: break-word;
 }
 
 .send-message-container {
@@ -107,6 +117,7 @@
   background-color: rgb(28, 148, 108);
   border: none;
   width: 64px;
+  cursor: pointer;
 }
 
 .conversation-header {
@@ -126,7 +137,7 @@
   width: 100%;
   height: 64px;
   cursor: pointer;
-  padding-left: 4px;
+  /* padding-left: 4px; */
 }
 
 .peer-avatar {
@@ -187,6 +198,9 @@
 
 .empty-channel-wrapper {
   padding: 8px;
+  text-align: center;
+  width: 100%;
+  font-weight: 600;
 }
 
 .peer-selected {

@@ -12,7 +12,7 @@ import { auth } from './services/firebase';
 
 function App() {
   const [user, setUser] = useState(() => auth.currentUser);
-  const [userInfo, setUserInfo] = useState();
+  // const [userInfo, setUserInfo] = useState();
   const [userList, setUserList] = useState({});
   const [activePeer, setActivePeer] = useState('');
 
@@ -60,7 +60,7 @@ function App() {
                 .child(convId)
                 .child(msgsKeys[i])
                 .update({ ...msgs[msgsKeys[i]], status: 'delivered' });
-              console.log('Messages delivered');
+              
             }
           }
         }
@@ -74,7 +74,7 @@ function App() {
           uid: user.uid,
           displayName: user.displayName,
           email: user.email,
-          profile_picture: user.photoURL,
+          photoURL: user.photoURL,
           isOnline: false,
           isActive: false,
         };
@@ -84,7 +84,8 @@ function App() {
           .child('Users')
           .child(user.uid)
           .update(updatedUserInfo);
-        setUserInfo(updatedUserInfo);
+        setUser(updatedUserInfo);
+        
       }
     });
   }, [user]);
@@ -92,21 +93,22 @@ function App() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        setUser(user);
+        // setUser(user);
         const userDetails = {
           uid: user.uid,
           displayName: user.displayName,
           email: user.email,
-          profile_picture: user.photoURL,
+          photoURL: user.photoURL,
           isOnline: true,
-          isActive: true,
+          isActive: false,
         };
         firebase
           .database()
           .ref('Users/' + user.uid)
           .set(userDetails);
 
-        setUserInfo(userDetails);
+        setUser(userDetails);
+        
 
         // when the user logs in , we get the list of all conversations the user is a part of and update the status of "sent" messages to "delivered"
         firebase
@@ -158,12 +160,13 @@ function App() {
           uid: user.uid,
           displayName: user.displayName,
           email: user.email,
-          profile_picture: user.photoURL,
+          photoURL: user.photoURL,
           isOnline: false,
           isActive: false,
         });
       setUserList({});
       setActivePeer('');
+      // setUserInfo('')
     } catch (error) {
       console.log(error.message);
     }
@@ -176,7 +179,7 @@ function App() {
       {user ? (
         <>
           <div className='wave-chat-header'>
-            <h3>Wave-Chat</h3>
+            <h1>Wave-Chat</h1>
             <button className='auth-button btn-sign-out' onClick={signOut}>
               Sign Out
             </button>
@@ -193,11 +196,7 @@ function App() {
             <div className='channel-container'>
               {/* we will show the conversation channel when the user clicks on a peer else landing channel screen will be EmptyChannelView */}
               {activePeer ? (
-                <Channel
-                  user={user}
-                  userInfo={userInfo}
-                  activePeer={activePeer}
-                />
+                <Channel user={user} activePeer={activePeer} />
               ) : (
                 <EmptyChannelView />
               )}

@@ -23,7 +23,7 @@ const Conversation = ({ user, chatDetails }) => {
           }
         >
           <div className='conversation-content'>
-            <div>{chat.content}</div>
+            <div className="chat-content">{chat.content}</div>
             <div className='dummy-bottom-content' ref={dummyLastEleRef}></div>
             <MessageStatusIcon status={chat.status} />
           </div>

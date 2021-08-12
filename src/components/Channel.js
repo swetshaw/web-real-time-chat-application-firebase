@@ -6,7 +6,7 @@ import ConversationView from './ConversationView';
 const Channel = ({ user, activePeer, userInfo }) => {
   const [message, setMessage] = useState('');
   const [conversationId, setConversationId] = useState('');
-  
+
   // we maintain conversation history to store the conversation ids that the user has been a part of
   const UpdateConversationHistory = (convId) => {
     const dbRef = firebase.database().ref();
@@ -82,7 +82,6 @@ const Channel = ({ user, activePeer, userInfo }) => {
       });
   }, [activePeer]);
 
-
   useEffect(() => {
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
@@ -91,30 +90,73 @@ const Channel = ({ user, activePeer, userInfo }) => {
             .database()
             .ref()
             .child('Users')
-            .child(userInfo.uid)
-            .update({ ...userInfo, isActive: true });
-          if (conversationId) {
-            const dbRef = firebase.database().ref();
-            dbRef
-              .child('Chats')
-              .child(conversationId)
-              .get()
-              .then((snapshot) => {
-                if (snapshot.exists()) {
-                  const msgs = snapshot.val();
-                  const msgsKeys = Object.keys(msgs);
-                  for (let i = msgsKeys.length - 1; i >= 0; i--) {
-                    if (msgs[msgsKeys[i]].status === 'seen') break;
-                    dbRef
-                      .child('Chats')
-                      .child(conversationId)
-                      .child(msgsKeys[i])
-                      .update({ ...msgs[msgsKeys[i]], status: 'seen' });
-                    // console.log('Updating message SEEN');
-                  }
-                }
-              });
-          }
+            .child(user.uid)
+            .update({ ...user, isActive: true })
+            .then(() => {
+              if (user.uid + activePeer.uid) {
+                const dbRef = firebase.database().ref();
+                dbRef
+                  .child('Chats')
+                  .child(user.uid + activePeer.uid)
+                  .get()
+                  .then((snapshot) => {
+                    if (snapshot.exists()) {
+                      const msgs = snapshot.val();
+                      const msgsKeys = Object.keys(msgs);
+                      for (let i = msgsKeys.length - 1; i >= 0; i--) {
+                        if (
+                          msgs[msgsKeys[i]].status === 'seen' &&
+                          msgs[msgsKeys[i]].receiver === user.email
+                        )
+                          break;
+                        if (
+                          msgs[msgsKeys[i]].status !== 'seen' &&
+                          msgs[msgsKeys[i]].receiver === user.email
+                        ) {
+                          dbRef
+                            .child('Chats')
+                            .child(user.uid + activePeer.uid)
+                            .child(msgsKeys[i])
+                            .update({ ...msgs[msgsKeys[i]], status: 'seen' });
+                          // console.log('Updating message SEEN');
+                        }
+                      }
+                    } else if (activePeer.uid + user.uid) {
+                      const dbRef = firebase.database().ref();
+                      dbRef
+                        .child('Chats')
+                        .child(activePeer.uid + user.uid)
+                        .get()
+                        .then((snapshot) => {
+                          if (snapshot.exists()) {
+                            const msgs = snapshot.val();
+                            const msgsKeys = Object.keys(msgs);
+                            for (let i = msgsKeys.length - 1; i >= 0; i--) {
+                              if (
+                                msgs[msgsKeys[i]].status === 'seen' &&
+                                msgs[msgsKeys[i]].receiver === user.email
+                              )
+                                break;
+                              if (
+                                msgs[msgsKeys[i]].status !== 'seen' &&
+                                msgs[msgsKeys[i]].receiver === user.email
+                              ) {
+                                dbRef
+                                  .child('Chats')
+                                  .child(activePeer.uid + user.uid)
+                                  .child(msgsKeys[i])
+                                  .update({
+                                    ...msgs[msgsKeys[i]],
+                                    status: 'seen',
+                                  });
+                              }
+                            }
+                          }
+                        });
+                    }
+                  });
+              }
+            });
         }
       }
       if (document.visibilityState === 'hidden') {
@@ -123,12 +165,12 @@ const Channel = ({ user, activePeer, userInfo }) => {
             .database()
             .ref()
             .child('Users')
-            .child(userInfo.uid)
-            .update({ ...userInfo, isActive: false });
+            .child(user.uid)
+            .update({ ...user, isActive: false });
         }
       }
     });
-  });
+  }, [user]);
   const handleMessageInput = (event) => {
     // console.log(event.target.value, user.uid);
     setMessage(event.target.value);

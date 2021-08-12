@@ -25,7 +25,8 @@ const UserListView = ({ user, userList, setActivePeer, activePeer }) => {
           .child(user.uid)
           .update({
             ...snapshot.val(),
-            activePeer: peerInfo.uid, // we set activePeer for each user to update the seen status of the messages
+            activePeer: peerInfo.uid,
+            isActive: true // we set activePeer for each user to update the seen status of the messages
           });
       });
   };
