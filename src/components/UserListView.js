@@ -47,7 +47,7 @@ const UserListView = ({ user, userList, setActivePeer, activePeer }) => {
             }}
           >
             <img
-              src={peerInfo.profile_picture}
+              src={peerInfo.photoURL}
               className='peer-avatar'
               alt={peerInfo.displayName}
             />
